@@ -72,4 +72,5 @@ Rails.application.configure do
 
   config.hosts << "job-application-tracker-production.up.railway.app"
 
+  config.active_record.migration_error = false
 end
