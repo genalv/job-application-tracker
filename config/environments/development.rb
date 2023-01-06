@@ -71,6 +71,7 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
   config.hosts << "job-application-tracker-production.up.railway.app"
+  config.hosts << "avion.tesla-cybertruck.tk"
 
   config.active_record.migration_error = false
 end
