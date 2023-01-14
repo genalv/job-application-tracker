@@ -55,11 +55,11 @@ class JobSearchController < ApplicationController
         @job.job_title = params[:job_title]
         @job.job_description = params[:job_description]
         @job.salary = 0.00  
-        @job.status = 1
+        @job.status = 0
         @job.accepted = false
         @job.user_id = current_user.id
 
-        if @job.save!
+        if @job.save! && params[:job_link] != nil
             redirect_to params[:job_link], allow_other_host: true
         else
             flash.now[:alert] = "Cannot redirect to link"
@@ -72,6 +72,30 @@ class JobSearchController < ApplicationController
         location = params[:anything][:location]
         isRemote = params[:anything][:isRemote] == 0 ? false : true
         @result = searchLinkedIn(keyword, location, isRemote)
+
+        job_tally = @jobs.size
+        job_inprogress = 0
+        job_accepted = 0
+        job_rejected = 0
+        
+        @jobs.each do |job|
+            if job.status.between?(0,3)
+                job_inprogress += 1
+            elsif job.status == 4
+                if job.accepted
+                    job_accepted +=1
+                else
+                    job_rejected +=1
+                end
+            end
+        end
+
+        @trackers = {
+            tally: job_tally,
+            inprogress: job_inprogress,
+            accepted: job_accepted,
+            rejected: job_rejected
+        }
     end
 
     private
@@ -98,6 +122,7 @@ class JobSearchController < ApplicationController
         puts JSON.parse(res.body).length()
         return JSON.parse(res.body)
     end
+    
     # Only allow a list of trusted parameters through.
     def job_params
         params.require(:job).permit(:title, :salary, :status, :accepted)
